@@ -1,0 +1,30 @@
+{
+  "prepare_queue": {
+    "installed": [],
+    "uninstalled": []
+  },
+  "config_munge": {
+    "files": {}
+  },
+  "installed_plugins": {
+    "cordova-plugin-keyboard": {
+      "PACKAGE_NAME": "planner.soccer.org"
+    },
+    "cordova-plugin-splashscreen": {
+      "PACKAGE_NAME": "planner.soccer.org"
+    },
+    "cordova-plugin-statusbar": {
+      "PACKAGE_NAME": "planner.soccer.org"
+    },
+    "cordova-plugin-whitelist": {
+      "PACKAGE_NAME": "planner.soccer.org"
+    },
+    "cordova-plugin-wkwebview-engine": {
+      "PACKAGE_NAME": "planner.soccer.org"
+    },
+    "cordova-plugin-camera": {
+      "PACKAGE_NAME": "planner.soccer.org"
+    }
+  },
+  "dependent_plugins": {}
+}

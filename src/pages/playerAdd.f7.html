@@ -1,0 +1,208 @@
+<template>
+  <div class="page" data-name="players">
+    <div class="navbar">
+      <div class="navbar-inner sliding">
+        <div class="left">
+          <a href="#" class="back link">
+            <i class="icon icon-back"></i>
+            <span class="if-not-md">Back</span>
+            <span class="if-not-ios">Back</span>
+          </a>
+        </div>
+        <div class="title row">Add Player ---- {{ money }}€</div>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <form class="list" id="player-form">
+        <ul>
+          <li>
+            <div class="item-content item-input">
+              <div class="item-inner">
+                <div class="item-title item-label">Name</div>
+                <div class="item-input-wrap">
+                  <input type="text" id="name" name="name" placeholder="Name" />
+                </div>
+              </div>
+            </div>
+          </li>
+          <li>
+            <div class="item-content item-input">
+              <div class="item-inner">
+                <div class="item-title item-label">E-mail</div>
+                <div class="item-input-wrap">
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="E-mail"
+                  />
+                </div>
+              </div>
+            </div>
+          </li>
+          <li>
+            <a
+              class="item-link smart-select smart-select-init"
+              data-open-in="popup"
+            >
+              <select id="position" name="position">
+                <option value="GK" selected>Goalkeeper</option>
+                <option value="SW">Sweeper</option>
+                <option value="CB">Center Back</option>
+                <option value="LB">Left Full Back</option>
+                <option value="RB">Right Full Back</option>
+                <option value="DM">Defensive Mid Stopper</option>
+                <option value="LWB">Left Wing Back</option>
+                <option value="RWB">Right Wing Back</option>
+                <option value="CM">Center Mid Fielder</option>
+                <option value="LM">Left Mid Fielder</option>
+                <option value="RM">Right Mid Fielder</option>
+                <option value="AM">Attacking Mid Fielder</option>
+                <option value="LF">Left Forward</option>
+                <option value="RF">Right Forward</option>
+                <option value="CF">Center Forward</option>
+                <option value="ST">Striker</option>
+              </select>
+              <div class="item-content">
+                <div class="item-inner">
+                  <div class="item-title">Position</div>
+                </div>
+              </div>
+            </a>
+          </li>
+          <li>
+            <div class="row">
+              <a
+                @click="TakeImage(0)"
+                class="col button button-raised button-round"
+              >
+                Choose a Photo
+              </a>
+              <a
+                @click="TakeImage(1)"
+                class="col button button-raised button-round"
+              >
+                Take a Photo
+              </a>
+            </div>
+          </li>
+        </ul>
+        <br />
+        <a
+          @click="ConvertFormToData()"
+          class="col button button-raised button-fill "
+        >
+          Add
+        </a>
+      </form>
+
+      <div class="block block-strong">
+        <div class="list media-list">
+          <ul>
+            {{#each players}}
+            <li>
+              <div class="item-content">
+                <div class="item-media">
+                  <img src="{{ this.photo_url }}" width="60" />
+                </div>
+                <div class="item-inner">
+                  <div class="item-title-row">
+                    <div class="item-title">
+                      {{ this.name }} : {{ this.position }}
+                    </div>
+                  </div>
+                  <div class="item-subtitle">
+                    Speed: {{ this.atributes.speed }} <br />
+                    Possesion: {{ this.atributes.possesion }} <br />
+                    Agility: {{ this.atributes.agility }} <br />
+                    Accuracy: {{ this.atributes.accuracy }}
+                  </div>
+                </div>
+              </div>
+            </li>
+            {{/each}}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+  import app from "../js/app.js";
+
+  export default {
+    data: function() {
+      return {
+        players: JSON.parse(localStorage.getItem("Players")) || [],
+        imagelink: null,
+        money: parseInt(localStorage.getItem("ActualMoney")) || 5000
+      };
+    },
+    methods: {
+      ConvertFormToData: function() {
+        var randomAtributes = {
+          speed: Math.floor(Math.random() * 99) + 1,
+          possesion: Math.floor(Math.random() * 99) + 1,
+          agility: Math.floor(Math.random() * 99) + 1,
+          accuracy: Math.floor(Math.random() * 99) + 1
+        };
+
+        var formData = {
+          id: "id:" + Date.now(),
+          name: document.getElementById("name").value,
+          email: document.getElementById("email").value,
+          position: document.getElementById("position").value,
+          photo_url: this.imagelink,
+          atributes: randomAtributes
+        };
+        var Players = [];
+        Players = JSON.parse(localStorage.getItem("Players")) || [];
+
+        Players.push(formData);
+        Players.sort();
+        localStorage.setItem("Players", JSON.stringify(Players));
+
+        document.getElementById("name").value = null;
+        document.getElementById("email").value = null;
+
+        var toastinfo = app.toast.create({
+          text: "Player " + formData.name + " added",
+          closeTimeout: 2000
+        });
+        toastinfo.open();
+        console.log(Players);
+
+        var money = this.money;
+        money = money - 500;
+        localStorage.setItem("ActualMoney", money.toString());
+
+        this.$setState({
+          players: JSON.parse(localStorage.getItem("Players")),
+          money: parseInt(localStorage.getItem("ActualMoney"))
+        });
+      },
+      TakeImage: function(type = 0) {
+        navigator.camera.getPicture(
+          suc => {
+            this.$setState({
+              imagelink: suc
+            });
+          },
+          err => {
+            app.dialog.alert("Image Taking aborted");
+          },
+          {
+            quality: 50,
+            destinationType: 1,
+            sourceType: type,
+            encodingType: 0,
+            mediaType: 0,
+            allowEdit: false,
+            correctOrientation: true
+          }
+        );
+      }
+    }
+  };
+</script>

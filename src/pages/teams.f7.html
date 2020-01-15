@@ -1,0 +1,202 @@
+<template>
+  <div class="page">
+    <div class="navbar">
+      <div class="navbar-inner sliding">
+        <div class="left">
+          <a href="#" class="back link">
+            <i class="icon icon-back"></i>
+            <span class="if-not-md">Back</span>
+            <span class="if-not-ios">Back</span>
+          </a>
+        </div>
+        <div class="title">Teams ---- {{ money }}€</div>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="block block-strong list" id="team-form">
+        <div class="block-title block-title-big">New Team</div>
+        <ul>
+          <li>
+            <div class="item-content item-input">
+              <div class="item-inner">
+                <div class="item-input-wrap">
+                  <input
+                    type="text"
+                    name="name"
+                    id="name"
+                    placeholder="Name of the team"
+                  />
+                </div>
+              </div>
+            </div>
+          </li>
+          <li>
+            <form id="players">
+              <a
+                class="item-link smart-select smart-select-init"
+                data-open-in="popup"
+                data-searchbar="true"
+                data-searchbar-placeholder="Search"
+              >
+                <select name="players" multiple>
+                  {{#each players}}
+                  <option value="{{ this.id }}"
+                    >{{ this.name }} : {{ this.position }}</option
+                  >
+                  {{/each}}
+                </select>
+                <div class="item-content">
+                  <div class="item-inner">
+                    <div class="item-title">Players</div>
+                  </div>
+                </div>
+              </a>
+            </form>
+          </li>
+          <li>
+            <a
+              class="item-link smart-select smart-select-init"
+              data-open-in="popup"
+            >
+              <select name="color" id="color">
+                <option value="red" selected>Red</option>
+                <option value="yellow">Yellow</option>
+                <option value="blue">Blue</option>
+                <option value="green">Green</option>
+                <option value="pink">Pink</option>
+              </select>
+              <div class="item-content">
+                <div class="item-inner">
+                  <div class="item-title">Color</div>
+                </div>
+              </div>
+            </a>
+          </li>
+          <li>
+            <button
+              @click="AddTeam()"
+              class="col button button-raised button-fill"
+            >
+              Add
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="block block-strong">
+        <div class="block-title block-title-big">Teams</div>
+
+
+        {{#each teams}}
+
+
+        <div class="card card-outline">
+            <h2 class="card-title card-header  bg-color-{{this.color}}">{{this.name}}</h2>
+            <div class="card-content card-content-padding">
+                <ul class="col list simple-list">
+                    {{#each this.players}}
+                    <li class="row">
+                      {{@index+1}}. {{ this.name }} : {{ this.position }}
+                    </li>
+                    {{/each}}
+                  </ul>
+            </div>
+            <div class="card-footer bg-color-{{this.color}}">
+                <a href="#" @click="SellTeam({{ @index}})" class="text-align-right link float-right color-black" >
+                    <i class="f7-icons">money_euro_round</i>
+                  </a>
+            </div>
+        </div>
+
+
+          {{/each}}
+
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+  import app from "../js/app.js";
+  export default {
+    data: function() {
+      return {
+        teams: JSON.parse(localStorage.getItem("Teams")) || [],
+        players: JSON.parse(localStorage.getItem("Players")) || [],
+        money: parseInt(localStorage.getItem("ActualMoney")) || 5000
+      };
+    },
+    methods: {
+      AddTeam: function() {
+        console.log(app.form.convertToData("#players"));
+        var formPlayers = app.form.convertToData("#players");
+
+        var Teams = [];
+        Teams = JSON.parse(localStorage.getItem("Teams")) || [];
+        var Players = [];
+        Players = JSON.parse(localStorage.getItem("Players"));
+        var PlayersObjects = [];
+
+        for (const [index, playerdata] of Players.entries()) {
+          for (let playerformid of formPlayers.players) {
+            if (playerdata.id == playerformid) {
+              PlayersObjects.push(playerdata);
+              Players.splice(index, 1);
+            }
+          }
+        }
+
+        var teamData = {
+          id: "teamid:" + Date.now(),
+          name: document.getElementById("name").value,
+          color: document.getElementById("color").value,
+          players: PlayersObjects
+        };
+        console.log(teamData);
+
+        Teams.push(teamData);
+        Teams.sort();
+        localStorage.setItem("Teams", JSON.stringify(Teams));
+        localStorage.setItem("Players", JSON.stringify(Players));
+
+        document.getElementById("name").value = null;
+        document.getElementById("players").value = null;
+
+        this.$setState({
+          teams: JSON.parse(localStorage.getItem("Teams")),
+          players: JSON.parse(localStorage.getItem("Players"))
+        });
+      },
+
+
+      SellTeam: function(teamIndex) {
+        var Teams = [];
+        Teams = JSON.parse(localStorage.getItem("Teams")) || [];
+        var Players = [];
+        Players = JSON.parse(localStorage.getItem("Players"));
+        var Money = 0;
+        Money = this.money;
+
+        var income = 0;
+
+        console.log(Teams[teamIndex].players);
+        Teams[teamIndex].players.forEach(player => {
+          console.log(player)
+          income = income +(player.atributes.speed +player.atributes.possesion +player.atributes.agility +player.atributes.accuracy) * 3;
+        });
+        console.log(income, Money)
+        Money = Money + income;
+        Teams.splice(teamIndex);
+
+
+        localStorage.setItem("Teams", JSON.stringify(Teams));
+        localStorage.setItem("ActualMoney", Money.toString());
+
+        this.$setState({
+          teams: JSON.parse(localStorage.getItem("Teams")),
+          money: parseInt(localStorage.getItem("ActualMoney"))
+        });
+      }
+    }
+  };
+</script>
